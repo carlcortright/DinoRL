@@ -529,11 +529,15 @@ Runner.prototype = {
       } else {
         deltaTime = !this.started ? 0 : deltaTime;
         this.horizon.update(deltaTime, this.currentSpeed, hasObstacles);
+        if (this.time % 1000 < 20) console.log(this.horizon.obstacles);
       }
 
       // Check for collisions.
       var collision = hasObstacles &&
           checkForCollision(this.horizon.obstacles[0], this.tRex);
+      // Shows collision boxes:
+      // var collision = hasObstacles &&
+      //     checkForCollision(this.horizon.obstacles[0], this.tRex, this.canvasCtx);
 
       if (!collision) {
         this.distanceRan += this.currentSpeed * deltaTime / this.msPerFrame;
@@ -2510,6 +2514,4 @@ Horizon.prototype = {
 })();
 
 //start the game
-new Runner('.interstitial-wrapper');
-
-
+window.dinoGame = new Runner('.interstitial-wrapper');
