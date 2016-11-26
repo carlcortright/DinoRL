@@ -529,7 +529,6 @@ Runner.prototype = {
       } else {
         deltaTime = !this.started ? 0 : deltaTime;
         this.horizon.update(deltaTime, this.currentSpeed, hasObstacles);
-        if (this.time % 1000 < 20) console.log(this.horizon.obstacles);
       }
 
       // Check for collisions.
@@ -655,6 +654,7 @@ Runner.prototype = {
    * @param {Event} e
    */
   onKeyDown: function(e) {
+
     // Prevent native page scrolling whilst tapping on mobile.
     if (IS_MOBILE) {
       e.preventDefault();

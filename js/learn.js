@@ -1,3 +1,7 @@
+
+var game = window.dinoGame;
+var player = new Player();
+
 // create an environment object
 var env = {};
 env.getNumStates = function() { return 8; }
@@ -9,13 +13,16 @@ agent = new RL.DQNAgent(env, spec);
 
 setInterval(function(){ // start the learning loop
 
-  var game = window.dinoGame;
-
   if (!game.started) {
     game.playIntro();
     game.play();
   } else if (game.activated) {
+
+    player.do(Player.actions.JUMP);
+
     console.log(game.horizon.obstacles);
+
+
   } else {
     game.restart();
   }
@@ -26,4 +33,4 @@ setInterval(function(){ // start the learning loop
 
 
 
-}, 1000);
+}, 500);
