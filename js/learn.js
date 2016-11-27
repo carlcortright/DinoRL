@@ -8,8 +8,10 @@ env.getNumStates = function() { return 10; }
 env.getMaxNumActions = function() { return 3; }
 
 // create the DQN agent
-var spec = { alpha: 0.01, experience_size: 5000} // see full options on DQN page
+var spec = { alpha: 0.001, experience_size: 5000} // see full options on DQN page
 agent = new RL.DQNAgent(env, spec);
+
+lastDist = 0;
 
 setInterval(function(){ // start the learning loop
 
@@ -17,9 +19,7 @@ setInterval(function(){ // start the learning loop
     game.playIntro();
     game.play();
   } else if (game.activated) {
-    // We survived the last action, set the reward to +1
-    reward = 1;
-
+    reward = true;
     // Create the feature vector
     s = [0,0,0,0,0,0,0,0,0,0];
     if(game.horizon.obstacles.length == 0){
@@ -52,6 +52,7 @@ setInterval(function(){ // start the learning loop
 
     var action = agent.act(s); // s is an array of length 10
 
+
     // Take the action chosen by the agent
     if(action == 0){
       player.do(Player.actions.IDLE);
@@ -60,20 +61,21 @@ setInterval(function(){ // start the learning loop
     } else if (action == 2) {
       player.do(Player.actions.DUCK);
     }
-    console.log(reward);
-    agent.learn(reward);
+
+    if(s[1] < 0 && lastDist > 0){
+      reward = 100;
+      agent.learn(reward);
+      console.log(reward);
+    }
+
+    lastDist = s[1];
+
 
   } else {
     reward = -100;
-    console.log(reward);
     agent.learn(reward);
+    console.log(reward);
     game.restart();
   }
 
-
-  // //... execute action in environment and get the reward
-  //  // the agent improves its Q,policy,model, etc. reward is a float
-
-
-
-}, 50);
+}, 100);
