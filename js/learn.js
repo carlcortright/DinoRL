@@ -8,16 +8,15 @@ env.getNumStates = function() { return 10; }
 env.getMaxNumActions = function() { return 3; }
 
 // create the DQN agent
-var spec = { alpha: 0.01, experience_size: 5000} // see full options on DQN page
+var spec = { alpha: 0.05, experience_size: 25, epsilon: 0.20}
 agent = new RL.DQNAgent(env, spec);
 
+// start the learning loop
 temp = 0;
-
-setInterval(function(){ // start the learning loop
+setInterval(function(){
   if (!game.started) {
     game.playIntro();
     game.play();
-    temp = 0;
   } else if (game.activated) {
     // Create the feature vector
     s = [0,0,0,0,0,0,0,0,0,0];
@@ -61,23 +60,29 @@ setInterval(function(){ // start the learning loop
       player.do(Player.actions.DUCK);
     }
 
-
+    // Reward the agent if it passes an obstacle successfully
     if(typeof game.horizon.obstacles[0] != 'undefined'){
       if(game.horizon.obstacles[0].ident != temp){
-        reward = 100;
+        reward = 1;
         agent.learn(reward);
+        console.log("Reward!")
         temp = game.horizon.obstacles[0].ident;
-        console.log(reward);
       }
     }
 
+    // Decrement epsilon slowly
+    if(agent.epsilon > 0.01){
+      agent.epsilon = agent.epsilon - 0.00005;
+    }
 
   } else {
-    reward = -100;
+    temp = 0;
+    reward = -1;
     agent.learn(reward);
-    console.log(reward);
+    console.log("Punishment!");
+    game.playIntro();
     game.restart();
   }
 
   localStorage.setItem("agent", JSON.stringify(agent));
-}, 100);
+}, 200);
