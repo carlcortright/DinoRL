@@ -99,6 +99,8 @@ var IS_MOBILE = window.navigator.userAgent.indexOf('Mobi') > -1 || IS_IOS;
 /** @const */
 var IS_TOUCH_ENABLED = 'ontouchstart' in window;
 
+var obstCount = 0;
+
 /**
  * Default game configuration.
  * @enum {number}
@@ -804,6 +806,7 @@ Runner.prototype = {
   },
 
   restart: function() {
+    obstCount = 0;
     if (!this.raqId) {
       this.playCount++;
       this.runningTime = 0;
@@ -1213,7 +1216,8 @@ function CollisionBox(x, y, w, h) {
  */
 function Obstacle(canvasCtx, type, spriteImgPos, dimensions,
     gapCoefficient, speed) {
-
+  this.ident = obstCount;
+  obstCount = obstCount + 1;
   this.canvasCtx = canvasCtx;
   this.spritePos = spriteImgPos;
   this.typeConfig = type;

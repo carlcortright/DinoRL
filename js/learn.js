@@ -8,18 +8,17 @@ env.getNumStates = function() { return 10; }
 env.getMaxNumActions = function() { return 3; }
 
 // create the DQN agent
-var spec = { alpha: 0.001, experience_size: 5000} // see full options on DQN page
+var spec = { alpha: 0.05, experience_size: 5000} // see full options on DQN page
 agent = new RL.DQNAgent(env, spec);
 
-lastDist = 0;
+temp = 0;
 
 setInterval(function(){ // start the learning loop
-
   if (!game.started) {
     game.playIntro();
     game.play();
+    temp = 0;
   } else if (game.activated) {
-    reward = true;
     // Create the feature vector
     s = [0,0,0,0,0,0,0,0,0,0];
     if(game.horizon.obstacles.length == 0){
@@ -62,13 +61,15 @@ setInterval(function(){ // start the learning loop
       player.do(Player.actions.DUCK);
     }
 
-    if(s[1] < 0 && lastDist > 0){
-      reward = 100;
-      agent.learn(reward);
-      console.log(reward);
-    }
 
-    lastDist = s[1];
+    if(typeof game.horizon.obstacles[0] != 'undefined'){
+      if(game.horizon.obstacles[0].ident != temp){
+        reward = 100;
+        agent.learn(reward);
+        temp = game.horizon.obstacles[0].ident;
+        console.log(reward);
+      }
+    }
 
 
   } else {
