@@ -8,7 +8,7 @@ env.getNumStates = function() { return 10; }
 env.getMaxNumActions = function() { return 3; }
 
 // create the DQN agent
-var spec = { alpha: 0.05, experience_size: 5000} // see full options on DQN page
+var spec = { alpha: 0.01, experience_size: 5000} // see full options on DQN page
 agent = new RL.DQNAgent(env, spec);
 
 temp = 0;
@@ -79,4 +79,5 @@ setInterval(function(){ // start the learning loop
     game.restart();
   }
 
+  localStorage.setItem("agent", JSON.stringify(agent));
 }, 100);
