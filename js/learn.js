@@ -12,7 +12,7 @@ var spec = { alpha: 0.05, experience_size: 25, epsilon: 0.20}
 agent = new RL.DQNAgent(env, spec);
 
 // start the learning loop
-temp = 0;
+previous = 0; // holds the previous obstacle
 setInterval(function(){
   if (!game.started) {
     game.playIntro();
@@ -62,11 +62,11 @@ setInterval(function(){
 
     // Reward the agent if it passes an obstacle successfully
     if(typeof game.horizon.obstacles[0] != 'undefined'){
-      if(game.horizon.obstacles[0].ident != temp){
+      if(game.horizon.obstacles[0].ident != previous){
         reward = 1;
         agent.learn(reward);
         console.log("Reward!")
-        temp = game.horizon.obstacles[0].ident;
+        previous = game.horizon.obstacles[0].ident;
       }
     }
 
