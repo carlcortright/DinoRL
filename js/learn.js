@@ -72,7 +72,7 @@ setInterval(function(){
 
     // Decrement epsilon slowly
     if(agent.epsilon > 0.01){
-      agent.epsilon = agent.epsilon - 0.00005;
+      agent.epsilon = agent.epsilon - 0.000005;
     }
 
   } else {
