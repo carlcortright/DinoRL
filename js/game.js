@@ -448,6 +448,7 @@ Runner.prototype = {
   playIntro: function() {
     if (!this.started && !this.crashed) {
       this.playingIntro = true;
+      this.playedIntro = true;
       this.tRex.playingIntro = true;
 
       // CSS animation definition.
@@ -521,7 +522,8 @@ Runner.prototype = {
       var hasObstacles = this.runningTime > this.config.CLEAR_TIME;
 
       // First jump triggers the intro.
-      if (this.tRex.jumpCount == 1 && !this.playingIntro) {
+      if (this.tRex.jumpCount == 1 && !this.playedIntro && !this.playingIntro) {
+        console.log("Playing intro");
         this.playIntro();
       }
 
