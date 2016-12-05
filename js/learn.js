@@ -13,6 +13,7 @@ agent = new RL.DQNAgent(env, spec);
 
 // start the learning loop
 previous = 0; // holds the previous obstacle
+accum = 0;
 setInterval(function(){
   if (!game.started) {
     game.playIntro();
@@ -67,10 +68,13 @@ setInterval(function(){
     // Take the action chosen by the agent
     if(action == 0){
       player.do(Player.actions.IDLE);
+      document.getElementById("action").innerHTML = "Idle";
     } else if(action == 1){
       player.do(Player.actions.JUMP);
+      document.getElementById("action").innerHTML = "Jump";
     } else if (action == 2) {
       player.do(Player.actions.DUCK);
+      document.getElementById("action").innerHTML = "Duck";
     }
 
     // Decrement epsilon slowly
@@ -82,7 +86,8 @@ setInterval(function(){
     temp = 0;
     reward = -10;
     agent.learn(reward);
-    console.log("Punishment!");
+    accum = reward;
+    document.getElementById("reward").innerHTML = accum.toString();
     game.restart();
   }
 
@@ -95,21 +100,33 @@ setInterval(function(){
     if(game.tRex.xPos > game.horizon.obstacles[0].xPos && game.tRex.xPos < game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width ){
       reward = 1;
       agent.learn(reward);
-      console.log("Reward!")
+      if(accum === -10){
+        accum = 0;
+      }
+      accum += reward;
+      document.getElementById("reward").innerHTML = accum.toString();
     }
   }
   if(typeof game.horizon.obstacles[1] != 'undefined'){
     if(game.tRex.xPos > game.horizon.obstacles[1].xPos && game.tRex.xPos < game.horizon.obstacles[1].xPos + game.horizon.obstacles[1].width ){
       reward = 1;
       agent.learn(reward);
-      console.log("Reward!")
+      if(accum === -10){
+        accum = 0;
+      }
+      accum += reward;
+      document.getElementById("reward").innerHTML = accum.toString();
     }
   }
   if(typeof game.horizon.obstacles[2] != 'undefined'){
     if(game.tRex.xPos > game.horizon.obstacles[2].xPos && game.tRex.xPos < game.horizon.obstacles[2].xPos + game.horizon.obstacles[2].width ){
       reward = 1;
       agent.learn(reward);
-      console.log("Reward!")
+      if(accum === -10){
+        accum = 0;
+      }
+      accum += reward;
+      document.getElementById("reward").innerHTML = accum.toString();
     }
   }
 }, 10);
