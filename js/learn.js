@@ -1,10 +1,9 @@
-
 var game = window.dinoGame;
 var player = new Player();
 
 // create an environment object
 var env = {};
-env.getNumStates = function() { return 3; }
+env.getNumStates = function() { return 5; }
 env.getMaxNumActions = function() { return 3; }
 
 // create the DQN agent
@@ -12,54 +11,30 @@ var spec = { alpha: 0.05, experience_size: 500, epsilon: 0.20}
 agent = new RL.DQNAgent(env, spec);
 
 // start the learning loop
-previous = 0; // holds the previous obstacle
-accum = 0;
+accum = 0; // Number jumped over
+jumped = false; // Has it jumped the obsticle
+trial = 0;
 setInterval(function(){
   if (!game.started) {
     game.playIntro();
     game.play();
   } else if (game.activated) {
     // Create the feature vector
-    s = [0,600, 0];
+    s = [0, 600, 0, 0, 0];
     if(game.horizon.obstacles.length == 0){
       s[0] = game.currentSpeed;
-    } else if (game.horizon.obstacles.length == 1){
+    } else if (game.horizon.obstacles.length > 0){
       s[0] = game.currentSpeed;
       obst = game.horizon.obstacles[0];
       s[1] = obst.xPos - game.tRex.xPos;
+      s[2] = obst.typeConfig.height;
+      s[3] = obst.typeConfig.width;
       if(obst.typeConfig.type == "CACTUS_LARGE"){
-        s[2] = 1;
+        s[4] = 1;
       } else if (obst.typeConfig.type == "CACTUS_SMALL") {
-        s[2] = 2;
+        s[4] = 2;
       } else if (obst.typeConfig.type == "PTERODACTYL") {
-        s[2] = 3;
-      }
-    } else if (game.horizon.obstacles.length == 2){
-      s[0] = game.currentSpeed;
-      firstDist = game.horizon.obstacles[0].xPos - game.tRex.xPos;
-      secondDist = game.horizon.obstacles[1].xPos - game.tRex.xPos;
-      obst = (firstDist > 0 ? game.horizon.obstacles[0] : game.horizon.obstacles[1]);
-      s[1] = obst.xPos - game.tRex.xPos;
-      if(obst.typeConfig.type == "CACTUS_LARGE"){
-        s[2] = 1;
-      } else if (obst.typeConfig.type == "CACTUS_SMALL") {
-        s[2] = 2;
-      } else if (obst.typeConfig.type == "PTERODACTYL") {
-        s[2] = 3;
-      }
-    } else if (game.horizon.obstacles.length >= 3){
-      s[0] = game.currentSpeed;
-      firstDist = game.horizon.obstacles[0].xPos - game.tRex.xPos;
-      secondDist = game.horizon.obstacles[1].xPos - game.tRex.xPos;
-      thirdDist = game.horizon.obstacles[2].xPos - game.tRex.xPos;
-      obst = (firstDist > 0 ? game.horizon.obstacles[0] : (secondDist > 0 ? game.horizon.obstacles[1] : game.horizon.obstacles[2]));
-      s[1] = obst.xPos - game.tRex.xPos;
-      if(obst.typeConfig.type == "CACTUS_LARGE"){
-        s[2] = 1;
-      } else if (obst.typeConfig.type == "CACTUS_SMALL") {
-        s[2] = 2;
-      } else if (obst.typeConfig.type == "PTERODACTYL") {
-        s[2] = 3;
+        s[4] = 3;
       }
     }
 
@@ -83,12 +58,13 @@ setInterval(function(){
     }
 
   } else {
-    temp = 0;
-    reward = -10;
+    reward = -1;
     agent.learn(reward);
-    accum = reward;
-    document.getElementById("reward").innerHTML = accum.toString();
     game.restart();
+    // Updates the google chart to display performance
+    trial += 1;
+    updateChart([trial, accum]);
+    accum = 0;
   }
 
   localStorage.setItem("agent", JSON.stringify(agent));
@@ -97,36 +73,13 @@ setInterval(function(){
 // Reward loop, rewards the agent when it is above/below an obstacle
 setInterval(function(){
   if(typeof game.horizon.obstacles[0] != 'undefined'){
-    if(game.tRex.xPos > game.horizon.obstacles[0].xPos && game.tRex.xPos < game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width ){
+    if(game.tRex.xPos > game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width && jumped === false) {
       reward = 1;
+      jumped = true;
       agent.learn(reward);
-      if(accum === -10){
-        accum = 0;
-      }
       accum += reward;
-      document.getElementById("reward").innerHTML = accum.toString();
-    }
-  }
-  if(typeof game.horizon.obstacles[1] != 'undefined'){
-    if(game.tRex.xPos > game.horizon.obstacles[1].xPos && game.tRex.xPos < game.horizon.obstacles[1].xPos + game.horizon.obstacles[1].width ){
-      reward = 1;
-      agent.learn(reward);
-      if(accum === -10){
-        accum = 0;
-      }
-      accum += reward;
-      document.getElementById("reward").innerHTML = accum.toString();
-    }
-  }
-  if(typeof game.horizon.obstacles[2] != 'undefined'){
-    if(game.tRex.xPos > game.horizon.obstacles[2].xPos && game.tRex.xPos < game.horizon.obstacles[2].xPos + game.horizon.obstacles[2].width ){
-      reward = 1;
-      agent.learn(reward);
-      if(accum === -10){
-        accum = 0;
-      }
-      accum += reward;
-      document.getElementById("reward").innerHTML = accum.toString();
+    } else if(game.tRex.xPos < game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width) {
+      jumped = false;
     }
   }
 }, 10);
