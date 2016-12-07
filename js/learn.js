@@ -10,10 +10,15 @@ env.getMaxNumActions = function() { return 3; }
 var spec = { alpha: 0.05, experience_size: 500, epsilon: 0.20}
 agent = new RL.DQNAgent(env, spec);
 
-// start the learning loop
-accum = 0; // Number jumped over
-jumped = false; // Has it jumped the obsticle
+// Variables for graph
+successfulJumpsSinceAvg = 0;
+trialsSinceLastAvg = 0;
 trial = 0;
+jumped = false;
+
+/*
+* Starts the Learning Loop
+*/
 setInterval(function(){
   if (!game.started) {
     game.playIntro();
@@ -58,13 +63,21 @@ setInterval(function(){
     }
 
   } else {
-    reward = -1;
-    agent.learn(reward);
-    game.restart();
+    // Punish for dying
+    giveReward(-1);
+
     // Updates the google chart to display performance
     trial += 1;
-    updateChart([trial, accum]);
-    accum = 0;
+    trialsSinceLastAvg += 1;
+    if(trialsSinceLastAvg/20 == 1){
+      avg = successfulJumpsSinceAvg / 20;
+      updateChart([trial, avg]);
+      successfulJumpsSinceAvg = 0;
+      trialsSinceLastAvg = 0;
+    }
+
+    // Restart the game automatically
+    game.restart();
   }
 
   localStorage.setItem("agent", JSON.stringify(agent));
@@ -74,12 +87,15 @@ setInterval(function(){
 setInterval(function(){
   if(typeof game.horizon.obstacles[0] != 'undefined'){
     if(game.tRex.xPos > game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width && jumped === false) {
-      reward = 1;
+      giveReward(1);
       jumped = true;
-      agent.learn(reward);
-      accum += reward;
+      successfulJumpsSinceAvg += 1;
     } else if(game.tRex.xPos < game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width) {
       jumped = false;
     }
   }
 }, 10);
+
+function giveReward(reward){
+  agent.learn(reward);
+}
