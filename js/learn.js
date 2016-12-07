@@ -7,7 +7,7 @@ env.getNumStates = function() { return 5; }
 env.getMaxNumActions = function() { return 3; }
 
 // create the DQN agent
-var spec = { alpha: 0.05, experience_size: 500, epsilon: 0.20}
+var spec = { alpha: 0.005, experience_size: 500, epsilon: 0.20, num_hidden_units: 500}
 agent = new RL.DQNAgent(env, spec);
 
 // Variables for graph
@@ -49,6 +49,7 @@ setInterval(function(){
     if(action == 0){
       player.do(Player.actions.IDLE);
       document.getElementById("action").innerHTML = "Idle";
+      agent.learn(1);
     } else if(action == 1){
       player.do(Player.actions.JUMP);
       document.getElementById("action").innerHTML = "Jump";
@@ -64,7 +65,7 @@ setInterval(function(){
 
   } else {
     // Punish for dying
-    giveReward(-1);
+    agent.learn(-25);
 
     // Updates the google chart to display performance
     trial += 1;
@@ -81,13 +82,13 @@ setInterval(function(){
   }
 
   localStorage.setItem("agent", JSON.stringify(agent));
-}, 100);
+}, 150);
 
 // Reward loop, rewards the agent when it is above/below an obstacle
 setInterval(function(){
   if(typeof game.horizon.obstacles[0] != 'undefined'){
     if(game.tRex.xPos > game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width && jumped === false) {
-      giveReward(1);
+      agent.learn(50);
       jumped = true;
       successfulJumpsSinceAvg += 1;
     } else if(game.tRex.xPos < game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width) {
@@ -95,7 +96,3 @@ setInterval(function(){
     }
   }
 }, 10);
-
-function giveReward(reward){
-  agent.learn(reward);
-}
