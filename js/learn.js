@@ -3,7 +3,7 @@ var player = new Player();
 
 // create an environment object
 var env = {};
-env.getNumStates = function() { return 5; }
+env.getNumStates = function() { return 6; }
 env.getMaxNumActions = function() { return 3; }
 
 // create the DQN agent
@@ -25,41 +25,44 @@ setInterval(function(){
     game.play();
   } else if (game.activated) {
     // Create the feature vector
-    s = [0, 600, 0, 0, 0];
+    s = [0, 0, 600, 0, 0, 0];
     if(game.horizon.obstacles.length == 0){
       s[0] = game.currentSpeed;
+      s[1] = 93 - game.tRex.yPos;
     } else if (game.horizon.obstacles.length > 0 && game.tRex.xPos < game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width){
       // If there is an obstacle, log it's distance.
       s[0] = game.currentSpeed;
+      s[1] = 93 - game.tRex.yPos;
       obst = game.horizon.obstacles[0];
-      s[1] = obst.xPos - game.tRex.xPos;
-      s[2] = obst.typeConfig.height;
-      s[3] = obst.typeConfig.width;
+      s[2] = obst.xPos - game.tRex.xPos;
+      s[3] = obst.typeConfig.height;
+      s[4] = obst.typeConfig.width;
       if(obst.typeConfig.type == "CACTUS_LARGE"){
-        s[4] = 1;
+        s[5] = 1;
       } else if (obst.typeConfig.type == "CACTUS_SMALL") {
-        s[4] = 2;
+        s[5] = 2;
       } else if (obst.typeConfig.type == "PTERODACTYL") {
-        s[4] = 3;
+        s[5] = 3;
       }
-    } else if (game.horizon.obstacles.length > 1 && game.tRex.xPos > game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width){
+    } else if (game.horizon.obstacles.length > 1 && game.tRex.xPos > game.horizon.obstacles[0].xPos){
       // There's more than one obstacle, and we've passed the first already
-      console.log("passed first");
+      console.log("Passed First");
       s[0] = game.currentSpeed;
+      s[1] = 93 - game.tRex.yPos;
       obst = game.horizon.obstacles[1];
-      s[1] = obst.xPos - game.tRex.xPos;
-      s[2] = obst.typeConfig.height;
-      s[3] = obst.typeConfig.width;
+      s[2] = obst.xPos - game.tRex.xPos;
+      s[3] = obst.typeConfig.height;
+      s[4] = obst.typeConfig.width;
       if(obst.typeConfig.type == "CACTUS_LARGE"){
-        s[4] = 1;
+        s[5] = 1;
       } else if (obst.typeConfig.type == "CACTUS_SMALL") {
-        s[4] = 2;
+        s[5] = 2;
       } else if (obst.typeConfig.type == "PTERODACTYL") {
-        s[4] = 3;
+        s[5] = 3;
       }
     }
     
-    var action = agent.act(s); // s is an array of length 10
+    var action = agent.act(s); // s is an array of length 5
 
     // Take the action chosen by the agent
     if(action == 0){
