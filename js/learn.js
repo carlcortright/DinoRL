@@ -7,7 +7,7 @@ env.getNumStates = function() { return 5; }
 env.getMaxNumActions = function() { return 3; }
 
 // create the DQN agent
-var spec = { alpha: 0.005, experience_size: 500, epsilon: 0.20, num_hidden_units: 500}
+var spec = { alpha: 0.005, experience_size: 100, epsilon: 0.20, num_hidden_units: 1000}
 agent = new RL.DQNAgent(env, spec);
 
 // Variables for graph
@@ -28,7 +28,8 @@ setInterval(function(){
     s = [0, 600, 0, 0, 0];
     if(game.horizon.obstacles.length == 0){
       s[0] = game.currentSpeed;
-    } else if (game.horizon.obstacles.length > 0){
+    } else if (game.horizon.obstacles.length > 0 && game.tRex.xPos < game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width){
+      // If there is an obstacle, log it's distance.
       s[0] = game.currentSpeed;
       obst = game.horizon.obstacles[0];
       s[1] = obst.xPos - game.tRex.xPos;
@@ -41,15 +42,30 @@ setInterval(function(){
       } else if (obst.typeConfig.type == "PTERODACTYL") {
         s[4] = 3;
       }
+    } else if (game.horizon.obstacles.length > 1 && game.tRex.xPos > game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width){
+      // There's more than one obstacle, and we've passed the first already
+      console.log("passed first");
+      s[0] = game.currentSpeed;
+      obst = game.horizon.obstacles[1];
+      s[1] = obst.xPos - game.tRex.xPos;
+      s[2] = obst.typeConfig.height;
+      s[3] = obst.typeConfig.width;
+      if(obst.typeConfig.type == "CACTUS_LARGE"){
+        s[4] = 1;
+      } else if (obst.typeConfig.type == "CACTUS_SMALL") {
+        s[4] = 2;
+      } else if (obst.typeConfig.type == "PTERODACTYL") {
+        s[4] = 3;
+      }
     }
-
+    
     var action = agent.act(s); // s is an array of length 10
 
     // Take the action chosen by the agent
     if(action == 0){
       player.do(Player.actions.IDLE);
       document.getElementById("action").innerHTML = "Idle";
-      agent.learn(1);
+      agent.learn(3);
     } else if(action == 1){
       player.do(Player.actions.JUMP);
       document.getElementById("action").innerHTML = "Jump";
@@ -70,8 +86,8 @@ setInterval(function(){
     // Updates the google chart to display performance
     trial += 1;
     trialsSinceLastAvg += 1;
-    if(trialsSinceLastAvg/20 == 1){
-      avg = successfulJumpsSinceAvg / 20;
+    if(trialsSinceLastAvg/50 == 1){
+      avg = successfulJumpsSinceAvg / 50;
       updateChart([trial, avg]);
       successfulJumpsSinceAvg = 0;
       trialsSinceLastAvg = 0;
