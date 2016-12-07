@@ -28,11 +28,11 @@ setInterval(function(){
     s = [0, 0, 600, 0, 0, 0];
     if(game.horizon.obstacles.length == 0){
       s[0] = game.currentSpeed;
-      s[1] = 93 - game.tRex.yPos;
+      s[1] = 93 - game.tRex.yPos; // Game default is 93
     } else if (game.horizon.obstacles.length > 0 && game.tRex.xPos < game.horizon.obstacles[0].xPos + game.horizon.obstacles[0].width){
       // If there is an obstacle, log it's distance.
       s[0] = game.currentSpeed;
-      s[1] = 93 - game.tRex.yPos;
+      s[1] = 93 - game.tRex.yPos; // Game default is 93
       obst = game.horizon.obstacles[0];
       s[2] = obst.xPos - game.tRex.xPos;
       s[3] = obst.typeConfig.height;
@@ -48,7 +48,7 @@ setInterval(function(){
       // There's more than one obstacle, and we've passed the first already
       console.log("Passed First");
       s[0] = game.currentSpeed;
-      s[1] = 93 - game.tRex.yPos;
+      s[1] = 93 - game.tRex.yPos; // Game default is 93
       obst = game.horizon.obstacles[1];
       s[2] = obst.xPos - game.tRex.xPos;
       s[3] = obst.typeConfig.height;
@@ -61,7 +61,7 @@ setInterval(function(){
         s[5] = 3;
       }
     }
-    
+
     var action = agent.act(s); // s is an array of length 5
 
     // Take the action chosen by the agent
