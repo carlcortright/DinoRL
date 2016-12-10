@@ -99,6 +99,8 @@ var IS_MOBILE = window.navigator.userAgent.indexOf('Mobi') > -1 || IS_IOS;
 /** @const */
 var IS_TOUCH_ENABLED = 'ontouchstart' in window;
 
+var obstCount = 0;
+
 /**
  * Default game configuration.
  * @enum {number}
@@ -446,6 +448,7 @@ Runner.prototype = {
   playIntro: function() {
     if (!this.started && !this.crashed) {
       this.playingIntro = true;
+      this.playedIntro = true;
       this.tRex.playingIntro = true;
 
       // CSS animation definition.
@@ -519,7 +522,8 @@ Runner.prototype = {
       var hasObstacles = this.runningTime > this.config.CLEAR_TIME;
 
       // First jump triggers the intro.
-      if (this.tRex.jumpCount == 1 && !this.playingIntro) {
+      if (this.tRex.jumpCount == 1 && !this.playedIntro && !this.playingIntro) {
+        console.log("Playing intro");
         this.playIntro();
       }
 
@@ -534,6 +538,9 @@ Runner.prototype = {
       // Check for collisions.
       var collision = hasObstacles &&
           checkForCollision(this.horizon.obstacles[0], this.tRex);
+      // Shows collision boxes:
+      // var collision = hasObstacles &&
+      //     checkForCollision(this.horizon.obstacles[0], this.tRex, this.canvasCtx);
 
       if (!collision) {
         this.distanceRan += this.currentSpeed * deltaTime / this.msPerFrame;
@@ -651,6 +658,7 @@ Runner.prototype = {
    * @param {Event} e
    */
   onKeyDown: function(e) {
+
     // Prevent native page scrolling whilst tapping on mobile.
     if (IS_MOBILE) {
       e.preventDefault();
@@ -800,6 +808,7 @@ Runner.prototype = {
   },
 
   restart: function() {
+    obstCount = 0;
     if (!this.raqId) {
       this.playCount++;
       this.runningTime = 0;
@@ -1209,7 +1218,8 @@ function CollisionBox(x, y, w, h) {
  */
 function Obstacle(canvasCtx, type, spriteImgPos, dimensions,
     gapCoefficient, speed) {
-
+  this.ident = obstCount;
+  obstCount = obstCount + 1;
   this.canvasCtx = canvasCtx;
   this.spritePos = spriteImgPos;
   this.typeConfig = type;
@@ -2510,6 +2520,4 @@ Horizon.prototype = {
 })();
 
 //start the game
-new Runner('.interstitial-wrapper');
-
-
+window.dinoGame = new Runner('.interstitial-wrapper');
